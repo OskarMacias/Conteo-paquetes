@@ -1,450 +1,226 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-slate-950">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensajes Secretos 💌 - Traductor & Encriptador</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(244, 114, 182, 0.15);
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .glow-pink {
-            box-shadow: 0 0 25px -5px rgba(236, 72, 153, 0.3);
-        }
-        .glow-purple {
-            box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.3);
-        }
-    </style>
-</head>
-<body class="min-h-full text-slate-100 flex flex-col justify-between selection:bg-pink-500 selection:text-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-950/40 to-slate-950">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Entrega de Paquetes</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+    }
 
-    <!-- Notificación Toast -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 ease-out flex items-center gap-3 px-5 py-3 rounded-2xl glass-panel border border-pink-500/40 text-pink-200 shadow-2xl">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-pink-400 text-lg"></i>
-        <span id="toast-message" class="text-sm font-medium">Acción realizada con éxito</span>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background-color: #fafafa;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: #e2e8f0;
+      border: none;
+      color: #334155;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #cbd5e1;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 6px;
+      text-align: center;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .total-box {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #1e40af;
+    }
+
+    .total-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .btn-reset {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-reset:hover {
+      background-color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📦 Control de Paquetes</h1>
+
+    <div class="user-card">
+      <span class="user-name">Oskar Macías</span>
+      <div class="counter-controls">
+        <button class="btn" onclick="adjustValue('oskar', -1)">-</button>
+        <input type="number" id="oskar" value="0" min="0" oninput="calculateTotal()">
+        <button class="btn" onclick="adjustValue('oskar', 1)">+</button>
+      </div>
     </div>
 
-    <!-- Encabezado -->
-    <header class="w-full max-w-4xl mx-auto pt-8 px-4 text-center">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300 text-xs font-semibold tracking-wide uppercase mb-4">
-            <i class="fa-solid fa-lock text-xs"></i> Cifrado Privado & Seguro
-        </div>
-        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400">
-            Traductor de Mensajes Secretos 💌
-        </h1>
-        <p class="mt-3 text-slate-400 text-sm sm:text-base max-w-lg mx-auto">
-            Envía y recibe mensajes encriptados. Elige una clave secreta compartida con tu pareja para leer lo que se envíen.
-        </p>
-    </header>
+    <div class="user-card">
+      <span class="user-name">Damaris Vega</span>
+      <div class="counter-controls">
+        <button class="btn" onclick="adjustValue('damaris', -1)">-</button>
+        <input type="number" id="damaris" value="0" min="0" oninput="calculateTotal()">
+        <button class="btn" onclick="adjustValue('damaris', 1)">+</button>
+      </div>
+    </div>
 
-    <!-- Contenido Principal -->
-    <main class="w-full max-w-3xl mx-auto p-4 my-6">
-        <div class="glass-panel rounded-3xl p-5 sm:p-8 glow-pink">
-            
-            <!-- Selector de Modo (Tabs) -->
-            <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/80 rounded-2xl border border-slate-800 mb-6">
-                <button id="tab-encrypt" onclick="switchMode('encrypt')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Encriptar (Codificar)
-                </button>
-                <button id="tab-decrypt" onclick="switchMode('decrypt')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200">
-                    <i class="fa-solid fa-key"></i> Desencriptar (Traductor)
-                </button>
-            </div>
+    <div class="user-card">
+      <span class="user-name">Zahory Garcia</span>
+      <div class="counter-controls">
+        <button class="btn" onclick="adjustValue('zahory', -1)">-</button>
+        <input type="number" id="zahory" value="0" min="0" oninput="calculateTotal()">
+        <button class="btn" onclick="adjustValue('zahory', 1)">+</button>
+      </div>
+    </div>
 
-            <!-- Selector de Algoritmo y Clave -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Método de Encriptación</label>
-                    <div class="relative">
-                        <select id="cipher-type" onchange="handleCipherChange()" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 appearance-none">
-                            <option value="aes">AES-256 (Secreto con Clave Secreta)</option>
-                            <option value="morse">Código Morse</option>
-                            <option value="binary">Binario (0s y 1s)</option>
-                            <option value="caesar">Cifrado César</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-4 top-3.5 text-xs text-slate-500 pointer-events-none"></i>
-                    </div>
-                </div>
+    <div class="user-card">
+      <span class="user-name">Isabel Villa</span>
+      <div class="counter-controls">
+        <button class="btn" onclick="adjustValue('isabel', -1)">-</button>
+        <input type="number" id="isabel" value="0" min="0" oninput="calculateTotal()">
+        <button class="btn" onclick="adjustValue('isabel', 1)">+</button>
+      </div>
+    </div>
 
-                <!-- Campo de Clave Secreta -->
-                <div id="key-container">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Clave Secreta Compartida</label>
-                    <div class="relative">
-                        <input type="password" id="secret-key" placeholder="Ej. NuestroAniversario2024" oninput="processText()" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-4 pr-10 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 placeholder-slate-600">
-                        <button onclick="toggleKeyVisibility()" class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300 p-1">
-                            <i id="key-toggle-icon" class="fa-solid fa-eye text-xs"></i>
-                        </button>
-                    </div>
-                </div>
+    <div class="total-box">
+      <span class="total-label">Total Entregados:</span>
+      <span class="total-value" id="total">0</span>
+    </div>
 
-                <!-- Campo de Desplazamiento para César -->
-                <div id="shift-container" class="hidden">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Desplazamiento: <span id="shift-value" class="text-pink-400">3</span></label>
-                    <input type="range" id="caesar-shift" min="1" max="25" value="3" oninput="document.getElementById('shift-value').innerText=this.value; processText();" class="w-full accent-pink-500 bg-slate-900 h-2 rounded-lg cursor-pointer my-3">
-                </div>
-            </div>
+    <button class="btn-reset" onclick="resetCounters()">Reiniciar Conteo</button>
+  </div>
 
-            <!-- Área de Entrada de Texto -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <label id="input-label" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Mensaje Original</label>
-                    <button onclick="clearAll()" class="text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1 transition-colors">
-                        <i class="fa-solid fa-trash-can"></i> Limpiar
-                    </button>
-                </div>
-                <textarea id="input-text" rows="4" oninput="processText()" placeholder="Escribe aquí tu mensaje..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 resize-none transition-all"></textarea>
-            </div>
+  <script>
+    const users = ['oskar', 'damaris', 'zahory', 'isabel'];
 
-            <!-- Área de Resultado traducido -->
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label id="output-label" class="text-xs font-semibold uppercase tracking-wider text-pink-400">Resultado Encriptado</label>
-                    <div class="flex items-center gap-2">
-                        <button id="btn-play-sound" onclick="playMorseCode()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-pink-300 px-2.5 py-1 rounded-lg border border-pink-500/30 transition-all flex items-center gap-1">
-                            <i class="fa-solid fa-volume-high"></i> Reproducir
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="relative">
-                    <textarea id="output-text" readonly rows="4" placeholder="El resultado aparecerá aquí automáticamente..." class="w-full bg-slate-950/80 border border-pink-500/30 rounded-2xl p-4 text-pink-300 placeholder-slate-700 text-sm focus:outline-none resize-none font-mono"></textarea>
-                    
-                    <div class="absolute right-3 bottom-3 flex items-center gap-2">
-                        <button onclick="copyToClipboard()" class="bg-pink-600 hover:bg-pink-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 active:scale-95">
-                            <i class="fa-solid fa-copy"></i> Copiar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botones para Compartir Directo -->
-            <div class="mt-6 pt-5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-                <span class="text-xs text-slate-500 font-medium">Enviar mensaje directo a tu pareja:</span>
-                <div class="flex gap-2">
-                    <button onclick="shareTo('whatsapp')" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5">
-                        <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp
-                    </button>
-                    <button onclick="shareTo('telegram')" class="bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 text-xs font-medium px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5">
-                        <i class="fa-brands fa-telegram text-sky-400"></i> Telegram
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Instrucciones de uso -->
-    <footer class="w-full max-w-3xl mx-auto p-4 mb-8 text-center">
-        <div class="glass-card rounded-2xl p-4 text-xs text-slate-400 border border-slate-800">
-            <p class="font-semibold text-slate-300 mb-1">💡 ¿Cómo usarlo con tu pareja?</p>
-            <p>1. Acuerden una <strong>Clave Secreta</strong> compartida (por ejemplo: <code class="text-pink-300 bg-slate-900 px-1 py-0.5 rounded">amor123</code>).</p>
-            <p>2. Escribe tu mensaje, copia el texto encriptado y envíaselo por chat.</p>
-            <p>3. Ella solo debe pegar el mensaje en esta página, colocar la misma clave y cambiar a <strong>Desencriptar</strong>.</p>
-        </div>
-    </footer>
-
-    <!-- Lógica JavaScript de la aplicación -->
-    <script>
-        let currentMode = 'encrypt';
-
-        // Mapeo Morse
-        const MORSE_MAP = {
-            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
-            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
-            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
-            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
-            'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
-            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
-            '9': '----.', '0': '-----', ' ': '/', '.': '.-.-.-', ',': '--..--',
-            '?': '..--..', '!': '-.-.--'
-        };
-        const REVERSE_MORSE = Object.fromEntries(Object.entries(MORSE_MAP).map(([k, v]) => [v, k]));
-
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            const toastIcon = document.getElementById('toast-icon');
-
-            toastMsg.innerText = message;
-            if (isError) {
-                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400 text-lg";
-                toast.classList.remove('border-pink-500/40');
-                toast.classList.add('border-rose-500/40');
-            } else {
-                toastIcon.className = "fa-solid fa-circle-check text-pink-400 text-lg";
-                toast.classList.remove('border-rose-500/40');
-                toast.classList.add('border-pink-500/40');
-            }
-
-            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-[-100px]', 'opacity-0');
-            }, 3000);
+    function calculateTotal() {
+      let total = 0;
+      users.forEach(user => {
+        const input = document.getElementById(user);
+        let val = parseInt(input.value) || 0;
+        if (val < 0) {
+          val = 0;
+          input.value = 0;
         }
+        total += val;
+      });
+      document.getElementById('total').innerText = total;
+    }
 
-        function switchMode(mode) {
-            currentMode = mode;
-            const btnEncrypt = document.getElementById('tab-encrypt');
-            const btnDecrypt = document.getElementById('tab-decrypt');
-            const inputLabel = document.getElementById('input-label');
-            const outputLabel = document.getElementById('output-label');
+    function adjustValue(userId, change) {
+      const input = document.getElementById(userId);
+      let currentValue = parseInt(input.value) || 0;
+      currentValue += change;
+      if (currentValue < 0) currentValue = 0;
+      input.value = currentValue;
+      calculateTotal();
+    }
 
-            if (mode === 'encrypt') {
-                btnEncrypt.className = "flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg";
-                btnDecrypt.className = "flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200";
-                inputLabel.innerText = "Mensaje Original";
-                outputLabel.innerText = "Resultado Encriptado";
-            } else {
-                btnDecrypt.className = "flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg";
-                btnEncrypt.className = "flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200";
-                inputLabel.innerText = "Mensaje Encriptado";
-                outputLabel.innerText = "Mensaje Traducido Original";
-            }
+    function resetCounters() {
+      if (confirm('¿Deseas reiniciar todos los contadores a cero?')) {
+        users.forEach(user => {
+          document.getElementById(user).value = 0;
+        });
+        calculateTotal();
+      }
+    }
+  </script>
 
-            processText();
-        }
-
-        function handleCipherChange() {
-            const cipher = document.getElementById('cipher-type').value;
-            const keyContainer = document.getElementById('key-container');
-            const shiftContainer = document.getElementById('shift-container');
-            const playBtn = document.getElementById('btn-play-sound');
-
-            if (cipher === 'aes') {
-                keyContainer.classList.remove('hidden');
-                shiftContainer.classList.add('hidden');
-                playBtn.classList.add('hidden');
-            } else if (cipher === 'caesar') {
-                keyContainer.classList.add('hidden');
-                shiftContainer.classList.remove('hidden');
-                playBtn.classList.add('hidden');
-            } else if (cipher === 'morse') {
-                keyContainer.classList.add('hidden');
-                shiftContainer.classList.add('hidden');
-                playBtn.classList.remove('hidden');
-            } else {
-                keyContainer.classList.add('hidden');
-                shiftContainer.classList.add('hidden');
-                playBtn.classList.add('hidden');
-            }
-
-            processText();
-        }
-
-        function toggleKeyVisibility() {
-            const keyInput = document.getElementById('secret-key');
-            const icon = document.getElementById('key-toggle-icon');
-            if (keyInput.type === 'password') {
-                keyInput.type = 'text';
-                icon.className = 'fa-solid fa-eye-slash text-xs';
-            } else {
-                keyInput.type = 'password';
-                icon.className = 'fa-solid fa-eye text-xs';
-            }
-        }
-
-        async function processText() {
-            const input = document.getElementById('input-text').value;
-            const output = document.getElementById('output-text');
-            const cipher = document.getElementById('cipher-type').value;
-
-            if (!input.trim()) {
-                output.value = '';
-                return;
-            }
-
-            try {
-                if (cipher === 'aes') {
-                    const key = document.getElementById('secret-key').value;
-                    if (!key) {
-                        output.value = '[ Ingrese una Clave Secreta arriba ]';
-                        return;
-                    }
-                    if (currentMode === 'encrypt') {
-                        output.value = await encryptAES(input, key);
-                    } else {
-                        output.value = await decryptAES(input, key);
-                    }
-                } else if (cipher === 'morse') {
-                    output.value = currentMode === 'encrypt' ? textToMorse(input) : morseToText(input);
-                } else if (cipher === 'binary') {
-                    output.value = currentMode === 'encrypt' ? textToBinary(input) : binaryToText(input);
-                } else if (cipher === 'caesar') {
-                    const shift = parseInt(document.getElementById('caesar-shift').value) || 3;
-                    const effectiveShift = currentMode === 'encrypt' ? shift : (26 - shift) % 26;
-                    output.value = caesarCipher(input, effectiveShift);
-                }
-            } catch (err) {
-                output.value = '[ Error al procesar: Verifica la clave o el mensaje ]';
-            }
-        }
-
-        // --- Cifrado AES con Web Crypto API ---
-        async function getKeyMaterial(password) {
-            const enc = new TextEncoder();
-            return window.crypto.subtle.importKey(
-                "raw",
-                enc.encode(password),
-                { name: "PBKDF2" },
-                false,
-                ["deriveBits", "deriveKey"]
-            );
-        }
-
-        async function deriveKey(password, salt) {
-            const keyMaterial = await getKeyMaterial(password);
-            return window.crypto.subtle.deriveKey(
-                {
-                    name: "PBKDF2",
-                    salt: salt,
-                    iterations: 100000,
-                    hash: "SHA-256"
-                },
-                keyMaterial,
-                { name: "AES-GCM", length: 256 },
-                false,
-                ["encrypt", "decrypt"]
-            );
-        }
-
-        async function encryptAES(text, password) {
-            const enc = new TextEncoder();
-            const salt = window.crypto.getRandomValues(new Uint8Array(16));
-            const iv = window.crypto.getRandomValues(new Uint8Array(12));
-            const key = await deriveKey(password, salt);
-
-            const encryptedContent = await window.crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv },
-                key,
-                enc.encode(text)
-            );
-
-            const combined = new Uint8Array(salt.length + iv.length + encryptedContent.byteLength);
-            combined.set(salt, 0);
-            combined.set(iv, salt.length);
-            combined.set(new Uint8Array(encryptedContent), salt.length + iv.length);
-
-            return btoa(String.fromCharCode(...combined));
-        }
-
-        async function decryptAES(encryptedBase64, password) {
-            const binaryString = atob(encryptedBase64.trim());
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-
-            const salt = bytes.slice(0, 16);
-            const iv = bytes.slice(16, 28);
-            const data = bytes.slice(28);
-
-            const key = await deriveKey(password, salt);
-            const decryptedContent = await window.crypto.subtle.decrypt(
-                { name: "AES-GCM", iv: iv },
-                key,
-                data
-            );
-
-            const dec = new TextDecoder();
-            return dec.decode(decryptedContent);
-        }
-
-        // --- Código Morse ---
-        function textToMorse(text) {
-            return text.toUpperCase().split('').map(ch => MORSE_MAP[ch] || ch).join(' ');
-        }
-        function morseToText(morse) {
-            return morse.trim().split(/\s+/).map(code => REVERSE_MORSE[code] || code).join('');
-        }
-
-        // --- Binario ---
-        function textToBinary(text) {
-            return text.split('').map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
-        }
-        function binaryToText(binary) {
-            return binary.trim().split(/\s+/).map(bin => String.fromCharCode(parseInt(bin, 2))).join('');
-        }
-
-        // --- Cifrado César ---
-        function caesarCipher(text, shift) {
-            return text.replace(/[a-zA-Z]/g, char => {
-                const base = char >= 'a' ? 97 : 65;
-                return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
-            });
-        }
-
-        // --- Utilidades ---
-        function copyToClipboard() {
-            const output = document.getElementById('output-text');
-            if (!output.value) return;
-            navigator.clipboard.writeText(output.value);
-            showToast("Mensaje copiado al portapapeles 📋");
-        }
-
-        function clearAll() {
-            document.getElementById('input-text').value = '';
-            document.getElementById('output-text').value = '';
-        }
-
-        function shareTo(platform) {
-            const text = document.getElementById('output-text').value;
-            if (!text) {
-                showToast("Genera o convierte un mensaje primero", true);
-                return;
-            }
-            const encodedText = encodeURIComponent("💌 Mensaje Secreto:\n" + text);
-            let url = "";
-            if (platform === 'whatsapp') {
-                url = `https://api.whatsapp.com/send?text=${encodedText}`;
-            } else if (platform === 'telegram') {
-                url = `https://t.me/share/url?url=${window.location.href}&text=${encodedText}`;
-            }
-            window.open(url, '_blank');
-        }
-
-        // --- Sonido para Código Morse ---
-        function playMorseCode() {
-            const morse = document.getElementById('output-text').value;
-            if (!morse) return;
-
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const ctx = new AudioContext();
-            let time = ctx.currentTime;
-
-            morse.split('').forEach(symbol => {
-                if (symbol === '.') {
-                    const osc = ctx.createOscillator();
-                    osc.connect(ctx.destination);
-                    osc.start(time);
-                    osc.stop(time + 0.1);
-                    time += 0.2;
-                } else if (symbol === '-') {
-                    const osc = ctx.createOscillator();
-                    osc.connect(ctx.destination);
-                    osc.start(time);
-                    osc.stop(time + 0.3);
-                    time += 0.4;
-                } else if (symbol === ' ') {
-                    time += 0.2;
-                }
-            });
-            showToast("Reproduciendo Código Morse... 🔊");
-        }
-    </script>
 </body>
 </html>
