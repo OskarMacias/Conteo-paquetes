@@ -26,7 +26,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -67,8 +67,8 @@
 
     .user-inputs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
       margin-top: 15px;
     }
 
@@ -77,6 +77,11 @@
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+    }
+
+    .user-box.special-box {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
     }
 
     .btn {
@@ -110,7 +115,7 @@
 
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 12px;
       margin-top: 20px;
     }
@@ -121,6 +126,11 @@
       border-radius: 8px;
       padding: 12px;
       text-align: center;
+    }
+
+    .summary-card.special-card {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
     }
 
     .summary-card.total-highlight {
@@ -201,6 +211,10 @@
             <label for="isabel">Isabel Villa</label>
             <input type="number" id="isabel" min="0" value="0" required>
           </div>
+          <div class="user-box special-box">
+            <label for="firmados">✍️ Paquetes Firmados</label>
+            <input type="number" id="firmados" min="0" value="0" required>
+          </div>
         </div>
 
         <button type="submit" class="btn btn-submit">Guardar Registro</button>
@@ -243,6 +257,10 @@
           <span>Isabel Villa</span>
           <strong id="sumIsabel">0</strong>
         </div>
+        <div class="summary-card special-card">
+          <span>Paquetes Firmados</span>
+          <strong id="sumFirmados">0</strong>
+        </div>
         <div class="summary-card total-highlight">
           <span>TOTAL GENERAL</span>
           <strong id="sumTotal">0</strong>
@@ -262,6 +280,7 @@
               <th>Damaris</th>
               <th>Zahory</th>
               <th>Isabel</th>
+              <th>Firmados</th>
               <th>Total Día</th>
               <th>Acciones</th>
             </tr>
@@ -290,8 +309,9 @@
       const damaris = parseInt(document.getElementById('damaris').value) || 0;
       const zahory = parseInt(document.getElementById('zahory').value) || 0;
       const isabel = parseInt(document.getElementById('isabel').value) || 0;
+      const firmados = parseInt(document.getElementById('firmados').value) || 0;
 
-      const total = oskar + damaris + zahory + isabel;
+      const total = oskar + damaris + zahory + isabel + firmados;
 
       const newRecord = {
         id: Date.now(),
@@ -300,6 +320,7 @@
         damaris,
         zahory,
         isabel,
+        firmados,
         total
       };
 
@@ -311,6 +332,7 @@
       document.getElementById('damaris').value = 0;
       document.getElementById('zahory').value = 0;
       document.getElementById('isabel').value = 0;
+      document.getElementById('firmados').value = 0;
     });
 
     function saveAndRender() {
@@ -325,11 +347,12 @@
       tbody.innerHTML = '';
 
       if (dataToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No hay registros en este rango.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">No hay registros en este rango.</td></tr>';
         return;
       }
 
       dataToDisplay.forEach(item => {
+        const firmadosVal = item.firmados || 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.date}</td>
@@ -337,6 +360,7 @@
           <td>${item.damaris}</td>
           <td>${item.zahory}</td>
           <td>${item.isabel}</td>
+          <td>${firmadosVal}</td>
           <td><strong>${item.total}</strong></td>
           <td><button class="btn-delete" onclick="deleteRecord(${item.id})">Eliminar</button></td>
         `;
@@ -358,22 +382,24 @@
       }
 
       // Calcular totales del rango
-      let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0;
+      let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0, totalFirmados = 0;
 
       filtered.forEach(r => {
         totalOskar += r.oskar;
         totalDamaris += r.damaris;
         totalZahory += r.zahory;
         totalIsabel += r.isabel;
+        totalFirmados += (r.firmados || 0);
       });
 
-      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel;
+      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalFirmados;
 
       // Actualizar tarjetas de resumen
       document.getElementById('sumOskar').innerText = totalOskar;
       document.getElementById('sumDamaris').innerText = totalDamaris;
       document.getElementById('sumZahory').innerText = totalZahory;
       document.getElementById('sumIsabel').innerText = totalIsabel;
+      document.getElementById('sumFirmados').innerText = totalFirmados;
       document.getElementById('sumTotal').innerText = grandTotal;
 
       renderTable(filtered);
