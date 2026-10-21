@@ -234,8 +234,8 @@
           <input type="date" id="endDate">
         </div>
         <div>
-          <button class="btn" onclick="applyFilter()">Filtrar</button>
-          <button class="btn" style="background:#64748b;" onclick="clearFilter()">Ver Todo</button>
+          <button class="btn" type="button" onclick="applyFilter()">Filtrar</button>
+          <button class="btn" type="button" style="background:#64748b;" onclick="clearFilter()">Ver Todo</button>
         </div>
       </div>
 
@@ -294,10 +294,19 @@
   </div>
 
   <script>
-    // Establecer fecha de hoy por defecto en el registro
-    document.getElementById('regDate').valueAsDate = new Date();
+    // Función para obtener la fecha local formateada YYYY-MM-DD
+    function getTodayFormatted() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
-    // Cargar datos guardados o iniciar vacío
+    // Establecer la fecha local correctamente
+    document.getElementById('regDate').value = getTodayFormatted();
+
+    // Cargar registros existentes
     let records = JSON.parse(localStorage.getItem('packageRecords')) || [];
 
     const form = document.getElementById('deliveryForm');
@@ -327,16 +336,16 @@
       records.push(newRecord);
       saveAndRender();
 
-      // Limpiar formulario excepto fecha
+      // Limpiar campos y mantener fecha actual
       document.getElementById('oskar').value = 0;
       document.getElementById('damaris').value = 0;
       document.getElementById('zahory').value = 0;
       document.getElementById('isabel').value = 0;
       document.getElementById('firmados').value = 0;
+      document.getElementById('regDate').value = getTodayFormatted();
     });
 
     function saveAndRender() {
-      // Ordenar por fecha descendente
       records.sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem('packageRecords', JSON.stringify(records));
       applyFilter();
@@ -362,7 +371,7 @@
           <td>${item.isabel}</td>
           <td>${firmadosVal}</td>
           <td><strong>${item.total}</strong></td>
-          <td><button class="btn-delete" onclick="deleteRecord(${item.id})">Eliminar</button></td>
+          <td><button class="btn-delete" type="button" onclick="deleteRecord(${item.id})">Eliminar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -381,7 +390,6 @@
         filtered = filtered.filter(r => r.date <= endDate);
       }
 
-      // Calcular totales del rango
       let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0, totalFirmados = 0;
 
       filtered.forEach(r => {
@@ -394,7 +402,6 @@
 
       const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalFirmados;
 
-      // Actualizar tarjetas de resumen
       document.getElementById('sumOskar').innerText = totalOskar;
       document.getElementById('sumDamaris').innerText = totalDamaris;
       document.getElementById('sumZahory').innerText = totalZahory;
@@ -418,7 +425,7 @@
       }
     }
 
-    // Carga inicial
+    // Inicializar
     applyFilter();
   </script>
 
