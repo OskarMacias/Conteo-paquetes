@@ -1,426 +1,138 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control e Historial de Entrega de Paquetes</title>
-  <style>
-    :root {
-      --primary-color: #2563eb;
-      --success-color: #16a34a;
-      --danger-color: #dc2626;
-      --bg-color: #f1f5f9;
-      --card-bg: #ffffff;
-      --text-color: #0f172a;
-      --border-color: #cbd5e1;
+<script>
+  // Obtener fecha local exacta (sin desfase por zona horaria UTC)
+  function getLocalDateString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Establecer fecha de hoy por defecto correctamente
+  document.getElementById('regDate').value = getLocalDateString();
+
+  // Cargar datos guardados o iniciar vacío
+  let records = JSON.parse(localStorage.getItem('packageRecords')) || [];
+
+  const form = document.getElementById('deliveryForm');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const date = document.getElementById('regDate').value;
+    const oskar = parseInt(document.getElementById('oskar').value) || 0;
+    const damaris = parseInt(document.getElementById('damaris').value) || 0;
+    const zahory = parseInt(document.getElementById('zahory').value) || 0;
+    const isabel = parseInt(document.getElementById('isabel').value) || 0;
+    const firmados = parseInt(document.getElementById('firmados').value) || 0;
+
+    const total = oskar + damaris + zahory + isabel + firmados;
+
+    const newRecord = {
+      id: Date.now(),
+      date,
+      oskar,
+      damaris,
+      zahory,
+      isabel,
+      firmados,
+      total
+    };
+
+    records.push(newRecord);
+    saveAndRender();
+
+    // Limpiar formulario y restablecer la fecha local
+    document.getElementById('oskar').value = 0;
+    document.getElementById('damaris').value = 0;
+    document.getElementById('zahory').value = 0;
+    document.getElementById('isabel').value = 0;
+    document.getElementById('firmados').value = 0;
+    document.getElementById('regDate').value = getLocalDateString();
+  });
+
+  function saveAndRender() {
+    // Ordenar por fecha descendente
+    records.sort((a, b) => new Date(b.date) - new Date(a.date));
+    localStorage.setItem('packageRecords', JSON.stringify(records));
+    applyFilter();
+  }
+
+  function renderTable(dataToDisplay) {
+    const tbody = document.getElementById('historyTableBody');
+    tbody.innerHTML = '';
+
+    if (dataToDisplay.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8">No hay registros en este rango.</td></tr>';
+      return;
     }
 
-    * { box-sizing: border-box; }
+    dataToDisplay.forEach(item => {
+      const firmadosVal = item.firmados || 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.date}</td>
+        <td>${item.oskar}</td>
+        <td>${item.damaris}</td>
+        <td>${item.zahory}</td>
+        <td>${item.isabel}</td>
+        <td>${firmadosVal}</td>
+        <td><strong>${item.total}</strong></td>
+        <td><button class="btn-delete" onclick="deleteRecord(${item.id})">Eliminar</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
+  function applyFilter() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    let filtered = records;
+
+    if (startDate) {
+      filtered = filtered.filter(r => r.date >= startDate);
+    }
+    if (endDate) {
+      filtered = filtered.filter(r => r.date <= endDate);
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    // Calcular totales del rango
+    let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0, totalFirmados = 0;
 
-    h1, h2 {
-      margin-top: 0;
-      color: #1e293b;
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border-color);
-    }
-
-    /* Formulario */
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    input[type="date"], input[type="number"] {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-
-    .user-inputs {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .user-box {
-      background: #f8fafc;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .user-box.special-box {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
-    }
-
-    .btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn:hover { background-color: #1d4ed8; }
-
-    .btn-submit {
-      width: 100%;
-      margin-top: 15px;
-      background-color: var(--success-color);
-    }
-    .btn-submit:hover { background-color: #15803d; }
-
-    /* Filtros y Totales */
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      align-items: end;
-    }
-
-    .summary-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .summary-card {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .summary-card.special-card {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
-    }
-
-    .summary-card.total-highlight {
-      background: #dcfce7;
-      border-color: #86efac;
-    }
-
-    .summary-card span {
-      display: block;
-      font-size: 0.85rem;
-      color: #475569;
-      font-weight: 600;
-    }
-
-    .summary-card strong {
-      font-size: 1.4rem;
-      color: #0f172a;
-    }
-
-    /* Tabla */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #f8fafc;
-      font-weight: 600;
-    }
-
-    .btn-delete {
-      background: var(--danger-color);
-      color: white;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-delete:hover { background: #b91c1c; }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <h1>📦 Registro e Historial de Paquetes</h1>
-
-    <!-- FORMULARIO DE REGISTRO -->
-    <div class="card">
-      <h2>Nuevo Registro</h2>
-      <form id="deliveryForm">
-        <div class="form-group">
-          <label for="regDate">Fecha del Registro:</label>
-          <input type="date" id="regDate" required>
-        </div>
-
-        <div class="user-inputs">
-          <div class="user-box">
-            <label for="oskar">Oskar Macías</label>
-            <input type="number" id="oskar" min="0" value="0" required>
-          </div>
-          <div class="user-box">
-            <label for="damaris">Damaris Vega</label>
-            <input type="number" id="damaris" min="0" value="0" required>
-          </div>
-          <div class="user-box">
-            <label for="zahory">Zahory Garcia</label>
-            <input type="number" id="zahory" min="0" value="0" required>
-          </div>
-          <div class="user-box">
-            <label for="isabel">Isabel Villa</label>
-            <input type="number" id="isabel" min="0" value="0" required>
-          </div>
-          <div class="user-box special-box">
-            <label for="firmados">✍️ Paquetes Firmados</label>
-            <input type="number" id="firmados" min="0" value="0" required>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-submit">Guardar Registro</button>
-      </form>
-    </div>
-
-    <!-- CONSULTA POR FECHAS -->
-    <div class="card">
-      <h2>Consulta y Filtro por Rango de Fechas</h2>
-      <div class="filter-grid">
-        <div>
-          <label for="startDate">Fecha Inicio:</label>
-          <input type="date" id="startDate">
-        </div>
-        <div>
-          <label for="endDate">Fecha Fin:</label>
-          <input type="date" id="endDate">
-        </div>
-        <div>
-          <button class="btn" onclick="applyFilter()">Filtrar</button>
-          <button class="btn" style="background:#64748b;" onclick="clearFilter()">Ver Todo</button>
-        </div>
-      </div>
-
-      <!-- TARJETAS DE RESUMEN DEL RANGO -->
-      <div class="summary-cards">
-        <div class="summary-card">
-          <span>Oskar Macías</span>
-          <strong id="sumOskar">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Damaris Vega</span>
-          <strong id="sumDamaris">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Zahory Garcia</span>
-          <strong id="sumZahory">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Isabel Villa</span>
-          <strong id="sumIsabel">0</strong>
-        </div>
-        <div class="summary-card special-card">
-          <span>Paquetes Firmados</span>
-          <strong id="sumFirmados">0</strong>
-        </div>
-        <div class="summary-card total-highlight">
-          <span>TOTAL GENERAL</span>
-          <strong id="sumTotal">0</strong>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABLA DE HISTORIAL -->
-    <div class="card">
-      <h2>Historial de Registros</h2>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Oskar</th>
-              <th>Damaris</th>
-              <th>Zahory</th>
-              <th>Isabel</th>
-              <th>Firmados</th>
-              <th>Total Día</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody">
-            <!-- Se llena dinámicamente -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Establecer fecha de hoy por defecto en el registro
-    document.getElementById('regDate').valueAsDate = new Date();
-
-    // Cargar datos guardados o iniciar vacío
-    let records = JSON.parse(localStorage.getItem('packageRecords')) || [];
-
-    const form = document.getElementById('deliveryForm');
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const date = document.getElementById('regDate').value;
-      const oskar = parseInt(document.getElementById('oskar').value) || 0;
-      const damaris = parseInt(document.getElementById('damaris').value) || 0;
-      const zahory = parseInt(document.getElementById('zahory').value) || 0;
-      const isabel = parseInt(document.getElementById('isabel').value) || 0;
-      const firmados = parseInt(document.getElementById('firmados').value) || 0;
-
-      const total = oskar + damaris + zahory + isabel + firmados;
-
-      const newRecord = {
-        id: Date.now(),
-        date,
-        oskar,
-        damaris,
-        zahory,
-        isabel,
-        firmados,
-        total
-      };
-
-      records.push(newRecord);
-      saveAndRender();
-
-      // Limpiar formulario excepto fecha
-      document.getElementById('oskar').value = 0;
-      document.getElementById('damaris').value = 0;
-      document.getElementById('zahory').value = 0;
-      document.getElementById('isabel').value = 0;
-      document.getElementById('firmados').value = 0;
+    filtered.forEach(r => {
+      totalOskar += r.oskar;
+      totalDamaris += r.damaris;
+      totalZahory += r.zahory;
+      totalIsabel += r.isabel;
+      totalFirmados += (r.firmados || 0);
     });
 
-    function saveAndRender() {
-      // Ordenar por fecha descendente
-      records.sort((a, b) => new Date(b.date) - new Date(a.date));
-      localStorage.setItem('packageRecords', JSON.stringify(records));
-      applyFilter();
-    }
+    const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalFirmados;
 
-    function renderTable(dataToDisplay) {
-      const tbody = document.getElementById('historyTableBody');
-      tbody.innerHTML = '';
+    // Actualizar tarjetas de resumen
+    document.getElementById('sumOskar').innerText = totalOskar;
+    document.getElementById('sumDamaris').innerText = totalDamaris;
+    document.getElementById('sumZahory').innerText = totalZahory;
+    document.getElementById('sumIsabel').innerText = totalIsabel;
+    document.getElementById('sumFirmados').innerText = totalFirmados;
+    document.getElementById('sumTotal').innerText = grandTotal;
 
-      if (dataToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8">No hay registros en este rango.</td></tr>';
-        return;
-      }
+    renderTable(filtered);
+  }
 
-      dataToDisplay.forEach(item => {
-        const firmadosVal = item.firmados || 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.date}</td>
-          <td>${item.oskar}</td>
-          <td>${item.damaris}</td>
-          <td>${item.zahory}</td>
-          <td>${item.isabel}</td>
-          <td>${firmadosVal}</td>
-          <td><strong>${item.total}</strong></td>
-          <td><button class="btn-delete" onclick="deleteRecord(${item.id})">Eliminar</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function applyFilter() {
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-
-      let filtered = records;
-
-      if (startDate) {
-        filtered = filtered.filter(r => r.date >= startDate);
-      }
-      if (endDate) {
-        filtered = filtered.filter(r => r.date <= endDate);
-      }
-
-      // Calcular totales del rango
-      let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0, totalFirmados = 0;
-
-      filtered.forEach(r => {
-        totalOskar += r.oskar;
-        totalDamaris += r.damaris;
-        totalZahory += r.zahory;
-        totalIsabel += r.isabel;
-        totalFirmados += (r.firmados || 0);
-      });
-
-      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalFirmados;
-
-      // Actualizar tarjetas de resumen
-      document.getElementById('sumOskar').innerText = totalOskar;
-      document.getElementById('sumDamaris').innerText = totalDamaris;
-      document.getElementById('sumZahory').innerText = totalZahory;
-      document.getElementById('sumIsabel').innerText = totalIsabel;
-      document.getElementById('sumFirmados').innerText = totalFirmados;
-      document.getElementById('sumTotal').innerText = grandTotal;
-
-      renderTable(filtered);
-    }
-
-    function clearFilter() {
-      document.getElementById('startDate').value = '';
-      document.getElementById('endDate').value = '';
-      applyFilter();
-    }
-
-    function deleteRecord(id) {
-      if (confirm('¿Deseas eliminar este registro?')) {
-        records = records.filter(r => r.id !== id);
-        saveAndRender();
-      }
-    }
-
-    // Carga inicial
+  function clearFilter() {
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
     applyFilter();
-  </script>
+  }
 
-</body>
-</html>
+  function deleteRecord(id) {
+    if (confirm('¿Deseas eliminar este registro?')) {
+      records = records.filter(r => r.id !== id);
+      saveAndRender();
+    }
+  }
+
+  // Carga inicial
+  applyFilter();
+</script>
