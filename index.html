@@ -19,6 +19,7 @@
       --primary-color: #2563eb;
       --success-color: #16a34a;
       --danger-color: #dc2626;
+      --warning-color: #d97706;
       --bg-color: #f1f5f9;
       --card-bg: #ffffff;
       --text-color: #0f172a;
@@ -77,7 +78,7 @@
 
     .user-inputs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 12px;
       margin-top: 15px;
     }
@@ -92,6 +93,11 @@
     .user-box.special-box {
       background: #f0fdf4;
       border-color: #bbf7d0;
+    }
+
+    .user-box.anomaly-box {
+      background: #fffbeb;
+      border-color: #fde68a;
     }
 
     .btn {
@@ -222,8 +228,12 @@
             <input type="number" id="isabel" min="0" value="0" required>
           </div>
           <div class="user-box special-box">
-            <label for="firmados">✍️ Paquetes Firmados</label>
+            <label for="firmados">✍️ Firmados</label>
             <input type="number" id="firmados" min="0" value="0" required>
+          </div>
+          <div class="user-box anomaly-box">
+            <label for="anomalias">⚠️ Anomalías</label>
+            <input type="number" id="anomalias" min="0" value="0" required>
           </div>
         </div>
 
@@ -245,7 +255,7 @@
         </div>
         <div>
           <button class="btn" type="button" onclick="applyFilter()">Filtrar</button>
-          <button class="btn" type="button" style="background:#64748b;" onclick="clearFilter()">Ver Todo</button>
+          <button class="btn" type="button" style="background:#64748b;" onclick="loadCurrentFortnight()">Quincena Actual</button>
         </div>
       </div>
 
@@ -291,6 +301,7 @@
               <th>Zahory</th>
               <th>Isabel</th>
               <th>Firmados</th>
+              <th>Anomalías</th>
               <th>Total Día</th>
               <th>Acciones</th>
             </tr>
@@ -312,6 +323,40 @@
       return `${year}-${month}-${day}`;
     }
 
+    // Calcula el rango de la quincena actual (del 1 al 15 o del 16 al fin de mes)
+    function getCurrentFortnightRange() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const day = now.getDate();
+
+      let start, end;
+
+      if (day <= 15) {
+        start = new Date(year, month, 1);
+        end = new Date(year, month, 15);
+      } else {
+        start = new Date(year, month, 16);
+        end = new Date(year, month + 1, 0); // Último día del mes
+      }
+
+      const format = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const da = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${da}`;
+      };
+
+      return { startDate: format(start), endDate: format(end) };
+    }
+
+    function loadCurrentFortnight() {
+      const range = getCurrentFortnightRange();
+      document.getElementById('startDate').value = range.startDate;
+      document.getElementById('endDate').value = range.endDate;
+      applyFilter();
+    }
+
     document.getElementById('regDate').value = getTodayFormatted();
 
     let records = JSON.parse(localStorage.getItem('packageRecords')) || [];
@@ -326,6 +371,7 @@
       const zahory = parseInt(document.getElementById('zahory').value) || 0;
       const isabel = parseInt(document.getElementById('isabel').value) || 0;
       const firmados = parseInt(document.getElementById('firmados').value) || 0;
+      const anomalias = parseInt(document.getElementById('anomalias').value) || 0;
 
       const total = oskar + damaris + zahory + isabel + firmados;
 
@@ -337,6 +383,7 @@
         zahory,
         isabel,
         firmados,
+        anomalias,
         total
       };
 
@@ -348,6 +395,7 @@
       document.getElementById('zahory').value = 0;
       document.getElementById('isabel').value = 0;
       document.getElementById('firmados').value = 0;
+      document.getElementById('anomalias').value = 0;
       document.getElementById('regDate').value = getTodayFormatted();
     });
 
@@ -362,12 +410,13 @@
       tbody.innerHTML = '';
 
       if (dataToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8">No hay registros en este rango.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">No hay registros en este rango.</td></tr>';
         return;
       }
 
       dataToDisplay.forEach(item => {
         const firmadosVal = item.firmados || 0;
+        const anomaliasVal = item.anomalias || 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.date}</td>
@@ -376,6 +425,7 @@
           <td>${item.zahory}</td>
           <td>${item.isabel}</td>
           <td>${firmadosVal}</td>
+          <td>${anomaliasVal}</td>
           <td><strong>${item.total}</strong></td>
           <td><button class="btn-delete" type="button" onclick="deleteRecord(${item.id})">Eliminar</button></td>
         `;
@@ -418,12 +468,6 @@
       renderTable(filtered);
     }
 
-    function clearFilter() {
-      document.getElementById('startDate').value = '';
-      document.getElementById('endDate').value = '';
-      applyFilter();
-    }
-
     function deleteRecord(id) {
       if (confirm('¿Deseas eliminar este registro?')) {
         records = records.filter(r => r.id !== id);
@@ -431,7 +475,8 @@
       }
     }
 
-    applyFilter();
+    // Al abrir la aplicación, carga automáticamente los límites de la quincena actual
+    loadCurrentFortnight();
   </script>
 
 </body>
