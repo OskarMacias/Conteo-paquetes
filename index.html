@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control e Historial de Entrega de Paquetes</title>
 
-  <!-- ICONO PARA NAVEGADOR Y PANTALLA DE INICIO (Caja de Paquete) -->
+  <!-- ICONO PARA NAVEGADOR Y PANTALLA DE INICIO -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='70' x='15' font-size='65'>📦</text></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='70' x='15' font-size='65'>📦</text></svg>">
 
-  <!-- CONFIGURACIÓN PARA ACCESO DIRECTO EN MÓVIL (PWA) -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Total Paquetes">
   <meta name="theme-color" content="#2563eb">
@@ -19,7 +18,6 @@
       --primary-color: #2563eb;
       --success-color: #16a34a;
       --danger-color: #dc2626;
-      --warning-color: #d97706;
       --bg-color: #f1f5f9;
       --card-bg: #ffffff;
       --text-color: #0f172a;
@@ -37,7 +35,7 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -57,7 +55,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Formulario */
     .form-group {
       margin-bottom: 15px;
     }
@@ -68,26 +65,32 @@
       margin-bottom: 5px;
     }
 
-    input[type="date"], input[type="number"] {
+    input[type="date"], input[type="number"], select {
       width: 100%;
       padding: 8px 12px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       font-size: 1rem;
+      background-color: #fff;
     }
 
     .user-inputs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 12px;
       margin-top: 15px;
     }
 
     .user-box {
       background: #f8fafc;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+    }
+
+    .user-box.extra-box {
+      background: #f5f3ff;
+      border-color: #ddd6fe;
     }
 
     .user-box.special-box {
@@ -121,7 +124,6 @@
     }
     .btn-submit:hover { background-color: #15803d; }
 
-    /* Filtros y Totales */
     .filter-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -142,6 +144,11 @@
       border-radius: 8px;
       padding: 12px;
       text-align: center;
+    }
+
+    .summary-card.extra-card {
+      background: #f5f3ff;
+      border-color: #c4b5fd;
     }
 
     .summary-card.special-card {
@@ -166,7 +173,6 @@
       color: #0f172a;
     }
 
-    /* Tabla */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -175,8 +181,9 @@
 
     th, td {
       border: 1px solid var(--border-color);
-      padding: 10px;
+      padding: 8px;
       text-align: center;
+      font-size: 0.95rem;
     }
 
     th {
@@ -227,6 +234,14 @@
             <label for="isabel">Isabel Villa</label>
             <input type="number" id="isabel" min="0" value="0" required>
           </div>
+          <div class="user-box extra-box">
+            <label for="paul">Paul Chavez</label>
+            <input type="number" id="paul" min="0" value="0" required>
+          </div>
+          <div class="user-box extra-box">
+            <label for="lorena">Lorena Gutierrez</label>
+            <input type="number" id="lorena" min="0" value="0" required>
+          </div>
           <div class="user-box special-box">
             <label for="firmados">✍️ Firmados</label>
             <input type="number" id="firmados" min="0" value="0" required>
@@ -241,50 +256,32 @@
       </form>
     </div>
 
-    <!-- CONSULTA POR FECHAS -->
+    <!-- CONSULTA POR QUINCENA / FECHAS -->
     <div class="card">
-      <h2>Consulta y Filtro por Rango de Fechas</h2>
+      <h2>Consulta por Quincena y Fechas</h2>
       <div class="filter-grid">
         <div>
+          <label for="fortnightSelect">Seleccionar Quincena:</label>
+          <select id="fortnightSelect" onchange="selectFortnightOption()">
+            <!-- Se llena dinámicamente con las quincenas registradas -->
+          </select>
+        </div>
+        <div>
           <label for="startDate">Fecha Inicio:</label>
-          <input type="date" id="startDate">
+          <input type="date" id="startDate" onchange="applyFilter()">
         </div>
         <div>
           <label for="endDate">Fecha Fin:</label>
-          <input type="date" id="endDate">
+          <input type="date" id="endDate" onchange="applyFilter()">
         </div>
         <div>
-          <button class="btn" type="button" onclick="applyFilter()">Filtrar</button>
           <button class="btn" type="button" style="background:#64748b;" onclick="loadCurrentFortnight()">Quincena Actual</button>
         </div>
       </div>
 
-      <!-- TARJETAS DE RESUMEN DEL RANGO -->
-      <div class="summary-cards">
-        <div class="summary-card">
-          <span>Oskar Macías</span>
-          <strong id="sumOskar">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Damaris Vega</span>
-          <strong id="sumDamaris">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Zahory Garcia</span>
-          <strong id="sumZahory">0</strong>
-        </div>
-        <div class="summary-card">
-          <span>Isabel Villa</span>
-          <strong id="sumIsabel">0</strong>
-        </div>
-        <div class="summary-card special-card">
-          <span>Paquetes Firmados</span>
-          <strong id="sumFirmados">0</strong>
-        </div>
-        <div class="summary-card total-highlight">
-          <span>TOTAL GENERAL</span>
-          <strong id="sumTotal">0</strong>
-        </div>
+      <!-- TARJETAS DE RESUMEN -->
+      <div class="summary-cards" id="summaryCardsContainer">
+        <!-- Se crean o visibilizan dinámicamente -->
       </div>
     </div>
 
@@ -300,6 +297,8 @@
               <th>Damaris</th>
               <th>Zahory</th>
               <th>Isabel</th>
+              <th>Paul</th>
+              <th>Lorena</th>
               <th>Firmados</th>
               <th>Anomalías</th>
               <th>Total Día</th>
@@ -323,40 +322,6 @@
       return `${year}-${month}-${day}`;
     }
 
-    // Calcula el rango de la quincena actual (del 1 al 15 o del 16 al fin de mes)
-    function getCurrentFortnightRange() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const day = now.getDate();
-
-      let start, end;
-
-      if (day <= 15) {
-        start = new Date(year, month, 1);
-        end = new Date(year, month, 15);
-      } else {
-        start = new Date(year, month, 16);
-        end = new Date(year, month + 1, 0); // Último día del mes
-      }
-
-      const format = (d) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const da = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${da}`;
-      };
-
-      return { startDate: format(start), endDate: format(end) };
-    }
-
-    function loadCurrentFortnight() {
-      const range = getCurrentFortnightRange();
-      document.getElementById('startDate').value = range.startDate;
-      document.getElementById('endDate').value = range.endDate;
-      applyFilter();
-    }
-
     document.getElementById('regDate').value = getTodayFormatted();
 
     let records = JSON.parse(localStorage.getItem('packageRecords')) || [];
@@ -370,10 +335,12 @@
       const damaris = parseInt(document.getElementById('damaris').value) || 0;
       const zahory = parseInt(document.getElementById('zahory').value) || 0;
       const isabel = parseInt(document.getElementById('isabel').value) || 0;
+      const paul = parseInt(document.getElementById('paul').value) || 0;
+      const lorena = parseInt(document.getElementById('lorena').value) || 0;
       const firmados = parseInt(document.getElementById('firmados').value) || 0;
       const anomalias = parseInt(document.getElementById('anomalias').value) || 0;
 
-      const total = oskar + damaris + zahory + isabel + firmados;
+      const total = oskar + damaris + zahory + isabel + paul + lorena + firmados;
 
       const newRecord = {
         id: Date.now(),
@@ -382,6 +349,8 @@
         damaris,
         zahory,
         isabel,
+        paul,
+        lorena,
         firmados,
         anomalias,
         total
@@ -394,6 +363,8 @@
       document.getElementById('damaris').value = 0;
       document.getElementById('zahory').value = 0;
       document.getElementById('isabel').value = 0;
+      document.getElementById('paul').value = 0;
+      document.getElementById('lorena').value = 0;
       document.getElementById('firmados').value = 0;
       document.getElementById('anomalias').value = 0;
       document.getElementById('regDate').value = getTodayFormatted();
@@ -402,6 +373,97 @@
     function saveAndRender() {
       records.sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem('packageRecords', JSON.stringify(records));
+      populateFortnightDropdown();
+      applyFilter();
+    }
+
+    // Calcula el rango de una quincena específica según una fecha dada
+    function getFortnightRange(d = new Date()) {
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const day = d.getDate();
+
+      let start, end;
+      if (day <= 15) {
+        start = new Date(year, month, 1);
+        end = new Date(year, month, 15);
+      } else {
+        start = new Date(year, month, 16);
+        end = new Date(year, month + 1, 0);
+      }
+
+      const format = (dt) => {
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const da = String(dt.getDate()).padStart(2, '0');
+        return `${y}-${m}-${da}`;
+      };
+
+      return { startDate: format(start), endDate: format(end) };
+    }
+
+    // Genera las opciones del selector de quincenas basándose en los registros y el mes actual
+    function populateFortnightDropdown() {
+      const select = document.getElementById('fortnightSelect');
+      select.innerHTML = '';
+
+      const rangesMap = new Map();
+
+      // Agregar quincena actual obligatoriamente
+      const currentRange = getFortnightRange(new Date());
+      const labelCurrent = formatFortnightLabel(currentRange.startDate, currentRange.endDate) + " (Actual)";
+      rangesMap.set(currentRange.startDate + '|' + currentRange.endDate, labelCurrent);
+
+      // Agregar quincenas existentes en los registros
+      records.forEach(r => {
+        if (!r.date) return;
+        const parts = r.date.split('-');
+        const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+        const range = getFortnightRange(dt);
+        const key = range.startDate + '|' + range.endDate;
+        if (!rangesMap.has(key)) {
+          rangesMap.set(key, formatFortnightLabel(range.startDate, range.endDate));
+        }
+      });
+
+      rangesMap.forEach((label, key) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = label;
+        select.appendChild(opt);
+      });
+    }
+
+    function formatFortnightLabel(startStr, endStr) {
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const pStart = startStr.split('-');
+      const pEnd = endStr.split('-');
+      const dayStart = parseInt(pStart[2]);
+      const dayEnd = parseInt(pEnd[2]);
+      const monthName = months[parseInt(pStart[1]) - 1];
+      const year = pStart[0];
+
+      const qNum = dayStart === 1 ? '1ra' : '2da';
+      return `${qNum} Quincena ${monthName} ${year} (${dayStart} al ${dayEnd})`;
+    }
+
+    function selectFortnightOption() {
+      const val = document.getElementById('fortnightSelect').value;
+      if (!val) return;
+      const [start, end] = val.split('|');
+      document.getElementById('startDate').value = start;
+      document.getElementById('endDate').value = end;
+      applyFilter();
+    }
+
+    function loadCurrentFortnight() {
+      const range = getFortnightRange(new Date());
+      document.getElementById('startDate').value = range.startDate;
+      document.getElementById('endDate').value = range.endDate;
+
+      const key = range.startDate + '|' + range.endDate;
+      document.getElementById('fortnightSelect').value = key;
+
       applyFilter();
     }
 
@@ -410,23 +472,28 @@
       tbody.innerHTML = '';
 
       if (dataToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9">No hay registros en este rango.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11">No hay registros en este rango.</td></tr>';
         return;
       }
 
       dataToDisplay.forEach(item => {
         const firmadosVal = item.firmados || 0;
         const anomaliasVal = item.anomalias || 0;
+        const paulVal = item.paul || 0;
+        const lorenaVal = item.lorena || 0;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.date}</td>
-          <td>${item.oskar}</td>
-          <td>${item.damaris}</td>
-          <td>${item.zahory}</td>
-          <td>${item.isabel}</td>
+          <td>${item.oskar || 0}</td>
+          <td>${item.damaris || 0}</td>
+          <td>${item.zahory || 0}</td>
+          <td>${item.isabel || 0}</td>
+          <td>${paulVal}</td>
+          <td>${lorenaVal}</td>
           <td>${firmadosVal}</td>
           <td>${anomaliasVal}</td>
-          <td><strong>${item.total}</strong></td>
+          <td><strong>${item.total || 0}</strong></td>
           <td><button class="btn-delete" type="button" onclick="deleteRecord(${item.id})">Eliminar</button></td>
         `;
         tbody.appendChild(tr);
@@ -446,25 +513,43 @@
         filtered = filtered.filter(r => r.date <= endDate);
       }
 
-      let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0, totalFirmados = 0;
+      let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0;
+      let totalPaul = 0, totalLorena = 0, totalFirmados = 0;
 
       filtered.forEach(r => {
-        totalOskar += r.oskar;
-        totalDamaris += r.damaris;
-        totalZahory += r.zahory;
-        totalIsabel += r.isabel;
+        totalOskar += (r.oskar || 0);
+        totalDamaris += (r.damaris || 0);
+        totalZahory += (r.zahory || 0);
+        totalIsabel += (r.isabel || 0);
+        totalPaul += (r.paul || 0);
+        totalLorena += (r.lorena || 0);
         totalFirmados += (r.firmados || 0);
       });
 
-      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalFirmados;
+      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalPaul + totalLorena + totalFirmados;
 
-      document.getElementById('sumOskar').innerText = totalOskar;
-      document.getElementById('sumDamaris').innerText = totalDamaris;
-      document.getElementById('sumZahory').innerText = totalZahory;
-      document.getElementById('sumIsabel').innerText = totalIsabel;
-      document.getElementById('sumFirmados').innerText = totalFirmados;
-      document.getElementById('sumTotal').innerText = grandTotal;
+      // Renderizar tarjetas dinámicas (solo muestra usuarios temporales si tienen > 0 paquetes en este filtro)
+      const cardsContainer = document.getElementById('summaryCardsContainer');
+      let cardsHTML = `
+        <div class="summary-card"><span>Oskar Macías</span><strong>${totalOskar}</strong></div>
+        <div class="summary-card"><span>Damaris Vega</span><strong>${totalDamaris}</strong></div>
+        <div class="summary-card"><span>Zahory Garcia</span><strong>${totalZahory}</strong></div>
+        <div class="summary-card"><span>Isabel Villa</span><strong>${totalIsabel}</strong></div>
+      `;
 
+      if (totalPaul > 0) {
+        cardsHTML += `<div class="summary-card extra-card"><span>Paul Chavez</span><strong>${totalPaul}</strong></div>`;
+      }
+      if (totalLorena > 0) {
+        cardsHTML += `<div class="summary-card extra-card"><span>Lorena Gutierrez</span><strong>${totalLorena}</strong></div>`;
+      }
+
+      cardsHTML += `
+        <div class="summary-card special-card"><span>Paquetes Firmados</span><strong>${totalFirmados}</strong></div>
+        <div class="summary-card total-highlight"><span>TOTAL GENERAL</span><strong>${grandTotal}</strong></div>
+      `;
+
+      cardsContainer.innerHTML = cardsHTML;
       renderTable(filtered);
     }
 
@@ -475,7 +560,8 @@
       }
     }
 
-    // Al abrir la aplicación, carga automáticamente los límites de la quincena actual
+    // Inicializar
+    populateFortnightDropdown();
     loadCurrentFortnight();
   </script>
 
