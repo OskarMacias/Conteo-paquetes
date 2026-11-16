@@ -35,7 +35,7 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1150px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -242,6 +242,10 @@
             <label for="lorena">Lorena Gutierrez</label>
             <input type="number" id="lorena" min="0" value="0" required>
           </div>
+          <div class="user-box extra-box">
+            <label for="selene">Selene Berreaza</label>
+            <input type="number" id="selene" min="0" value="0" required>
+          </div>
           <div class="user-box special-box">
             <label for="firmados">✍️ Firmados</label>
             <input type="number" id="firmados" min="0" value="0" required>
@@ -299,6 +303,7 @@
               <th>Isabel</th>
               <th>Paul</th>
               <th>Lorena</th>
+              <th>Selene</th>
               <th>Firmados</th>
               <th>Anomalías</th>
               <th>Total Día</th>
@@ -337,10 +342,11 @@
       const isabel = parseInt(document.getElementById('isabel').value) || 0;
       const paul = parseInt(document.getElementById('paul').value) || 0;
       const lorena = parseInt(document.getElementById('lorena').value) || 0;
+      const selene = parseInt(document.getElementById('selene').value) || 0;
       const firmados = parseInt(document.getElementById('firmados').value) || 0;
       const anomalias = parseInt(document.getElementById('anomalias').value) || 0;
 
-      const total = oskar + damaris + zahory + isabel + paul + lorena + firmados;
+      const total = oskar + damaris + zahory + isabel + paul + lorena + selene + firmados;
 
       const newRecord = {
         id: Date.now(),
@@ -351,6 +357,7 @@
         isabel,
         paul,
         lorena,
+        selene,
         firmados,
         anomalias,
         total
@@ -365,6 +372,7 @@
       document.getElementById('isabel').value = 0;
       document.getElementById('paul').value = 0;
       document.getElementById('lorena').value = 0;
+      document.getElementById('selene').value = 0;
       document.getElementById('firmados').value = 0;
       document.getElementById('anomalias').value = 0;
       document.getElementById('regDate').value = getTodayFormatted();
@@ -377,7 +385,6 @@
       applyFilter();
     }
 
-    // Calcula el rango de una quincena específica según una fecha dada
     function getFortnightRange(d = new Date()) {
       const year = d.getFullYear();
       const month = d.getMonth();
@@ -402,19 +409,16 @@
       return { startDate: format(start), endDate: format(end) };
     }
 
-    // Genera las opciones del selector de quincenas basándose en los registros y el mes actual
     function populateFortnightDropdown() {
       const select = document.getElementById('fortnightSelect');
       select.innerHTML = '';
 
       const rangesMap = new Map();
 
-      // Agregar quincena actual obligatoriamente
       const currentRange = getFortnightRange(new Date());
       const labelCurrent = formatFortnightLabel(currentRange.startDate, currentRange.endDate) + " (Actual)";
       rangesMap.set(currentRange.startDate + '|' + currentRange.endDate, labelCurrent);
 
-      // Agregar quincenas existentes en los registros
       records.forEach(r => {
         if (!r.date) return;
         const parts = r.date.split('-');
@@ -472,7 +476,7 @@
       tbody.innerHTML = '';
 
       if (dataToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11">No hay registros en este rango.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12">No hay registros en este rango.</td></tr>';
         return;
       }
 
@@ -481,6 +485,7 @@
         const anomaliasVal = item.anomalias || 0;
         const paulVal = item.paul || 0;
         const lorenaVal = item.lorena || 0;
+        const seleneVal = item.selene || 0;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -491,6 +496,7 @@
           <td>${item.isabel || 0}</td>
           <td>${paulVal}</td>
           <td>${lorenaVal}</td>
+          <td>${seleneVal}</td>
           <td>${firmadosVal}</td>
           <td>${anomaliasVal}</td>
           <td><strong>${item.total || 0}</strong></td>
@@ -514,7 +520,7 @@
       }
 
       let totalOskar = 0, totalDamaris = 0, totalZahory = 0, totalIsabel = 0;
-      let totalPaul = 0, totalLorena = 0, totalFirmados = 0;
+      let totalPaul = 0, totalLorena = 0, totalSelene = 0, totalFirmados = 0;
 
       filtered.forEach(r => {
         totalOskar += (r.oskar || 0);
@@ -523,12 +529,12 @@
         totalIsabel += (r.isabel || 0);
         totalPaul += (r.paul || 0);
         totalLorena += (r.lorena || 0);
+        totalSelene += (r.selene || 0);
         totalFirmados += (r.firmados || 0);
       });
 
-      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalPaul + totalLorena + totalFirmados;
+      const grandTotal = totalOskar + totalDamaris + totalZahory + totalIsabel + totalPaul + totalLorena + totalSelene + totalFirmados;
 
-      // Renderizar tarjetas dinámicas (solo muestra usuarios temporales si tienen > 0 paquetes en este filtro)
       const cardsContainer = document.getElementById('summaryCardsContainer');
       let cardsHTML = `
         <div class="summary-card"><span>Oskar Macías</span><strong>${totalOskar}</strong></div>
@@ -542,6 +548,9 @@
       }
       if (totalLorena > 0) {
         cardsHTML += `<div class="summary-card extra-card"><span>Lorena Gutierrez</span><strong>${totalLorena}</strong></div>`;
+      }
+      if (totalSelene > 0) {
+        cardsHTML += `<div class="summary-card extra-card"><span>Selene Berreaza</span><strong>${totalSelene}</strong></div>`;
       }
 
       cardsHTML += `
@@ -560,7 +569,6 @@
       }
     }
 
-    // Inicializar
     populateFortnightDropdown();
     loadCurrentFortnight();
   </script>
